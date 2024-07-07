@@ -1,0 +1,35 @@
+name: shadow-main CI
+
+on:
+  pull_request:
+    branches:
+      - shadow-main
+  push:
+    branches:
+      - shadow-main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+
+    - name: Lint PHP Syntax
+      run: |
+        Get-ChildItem -Recurse -Filter *.php | ForEach-Object {
+          php -l $_.FullName
+          if ($LASTEXITCODE -ne 0) {
+            Write-Error "PHP syntax check failed for $($_.FullName)"
+            exit 1
+          }
+        }
